@@ -37,7 +37,7 @@ func NewService() Service {
 // SetServer Set the server (eg: whatsapp or telegram)
 func (s *service) SetServer(server Server) {
 	s.Server = server
-	s.Server.Listen(s)
+	go s.Server.Listen(s)
 	go s.Server.Serve()
 }
 

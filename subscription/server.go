@@ -53,6 +53,7 @@ func (s *server) Listen(service Service) {
 		}
 		mess := update.Message
 		message := models.Message{}
+		message.ChatId = fmt.Sprint(mess.Chat.ID)
 		var fileUrl string
 		var err error
 		if len(mess.Photo) != 0 {
@@ -95,7 +96,7 @@ func (s *server) Listen(service Service) {
 				continue
 			}
 		}
-		s.updates <- message
+		service.SendToClients() <- message
 	}
 }
 
@@ -110,53 +111,86 @@ func (s *server) Serve() {
 
 		var caption string
 		if mess.Caption != nil {
-			caption = mess.Sender + ": " + *mess.Caption
+			caption = "[" + mess.Sender + "](tg://user?id=6972063311): " + *mess.Caption
 		}
 
+		text := "[" + mess.Sender + "](tg://user?id=6972063311): "
 		switch {
 		case mess.Text != nil:
-
+			text += *mess.Text
+			m := tgBotAPI.NewMessage(chatId, text)
+			m.ParseMode = "Markdown"
+			msg = m
 		case mess.Image != nil && len(mess.Image) > 0:
 			m := tgBotAPI.NewPhoto(chatId, tgBotAPI.FileBytes{
 				Name:  "Photo",
 				Bytes: mess.Image,
 			})
-			m.Caption = caption
+			m.ParseMode = "Markdown"
+			if caption != "" {
+				m.Caption = caption
+			} else {
+				m.Caption = text + "Send a photo."
+			}
 			msg = m
 		case mess.Video != nil && len(mess.Video) > 0:
 			m := tgBotAPI.NewVideo(chatId, tgBotAPI.FileBytes{
 				Name:  "Video",
 				Bytes: mess.Video,
 			})
-			m.Caption = caption
+			m.ParseMode = "Markdown"
+			if caption != "" {
+				m.Caption = caption
+			} else {
+				m.Caption = text + "Send a video."
+			}
 			msg = m
 		case mess.Audio != nil && len(mess.Audio) > 0:
 			m := tgBotAPI.NewAudio(chatId, tgBotAPI.FileBytes{
-				Name:  "Video",
+				Name:  "Audio",
 				Bytes: mess.Audio,
 			})
-			m.Caption = caption
+			m.ParseMode = "Markdown"
+			if caption != "" {
+				m.Caption = caption
+			} else {
+				m.Caption = text + "Send a audio."
+			}
 			msg = m
 		case mess.Document != nil && len(mess.Document) > 0:
+			var name string
+			if mess.Filename != nil {
+				name = *mess.Filename
+			} else {
+				name = "Document"
+			}
 			m := tgBotAPI.NewDocument(chatId, tgBotAPI.FileBytes{
-				Name:  "Video",
+				Name:  name,
 				Bytes: mess.Document,
 			})
-			m.Caption = caption
+			m.ParseMode = "Markdown"
+			if caption != "" {
+				m.Caption = caption
+			} else {
+				m.Caption = text + "Send a document."
+			}
 			msg = m
 		case mess.Sticker != nil && len(mess.Sticker) > 0:
 			msg = tgBotAPI.NewSticker(chatId, tgBotAPI.FileBytes{
-				Name:  "Video",
+				Name:  "Sticker",
 				Bytes: mess.Sticker,
 			})
 		case mess.Caption != nil:
-
+			m := tgBotAPI.NewMessage(chatId, caption)
+			m.ParseMode = "Markdown"
+			msg = m
 		}
 
 		rsp, err := s.conn.Send(msg)
 		if err != nil {
 			log.Println("error sending message: ", err)
+		} else {
+			log.Println("message send with id: ", rsp.MessageID)
 		}
-		log.Println("message send with id: ", rsp.MessageID)
 	}
 }
