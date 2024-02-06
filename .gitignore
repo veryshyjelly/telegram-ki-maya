@@ -1,0 +1,5 @@
+.env
+telegram-ki-maya
+.idea/
+tmp/
+*.exe
