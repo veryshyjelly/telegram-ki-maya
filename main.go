@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"telegram-ki-maya/api"
@@ -12,6 +13,11 @@ import (
 func main() {
 	app := fiber.New()
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	client := pkg.Connect(os.Getenv("TOKEN"), true)
 	server := subscription.NewServer(client)
 	sub := subscription.NewService()
@@ -19,5 +25,5 @@ func main() {
 	sub.Run()
 
 	app.Get("/connect", api.Connect(sub))
-	log.Fatalln(app.Listen(":8050"))
+	log.Fatalln(app.Listen(":8060"))
 }
