@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"telegram-ki-maya/models"
 	"telegram-ki-maya/pkg"
 	"time"
@@ -85,7 +86,15 @@ func (s *server) Listen(service Service) {
 			} else if mess.Sticker != nil {
 				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
 			} else if mess.Text != "" {
-				message.Text = &mess.Text
+				m := strings.Split(mess.Text, "\n")
+				var x []string
+				for _, v := range m {
+					if v[0] != '>' {
+						x = append(x, v)
+					}
+				}
+				text := strings.Join(x, "\n")
+				message.Text = &text
 			}
 			if err != nil {
 				log.Println("Error getting direct url.")
@@ -136,7 +145,9 @@ func (s *server) Serve() {
 		text := ""
 
 		if mess.QuotedText != nil {
-			text += "> " + *mess.QuotedText + "\n"
+			for _, v := range strings.Split(*mess.QuotedText, "\n") {
+				text += "> " + v + "\n"
+			}
 		}
 
 		text += "[" + mess.Sender + "](tg://user?id=6972063311): "
