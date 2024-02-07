@@ -145,14 +145,14 @@ func (s *server) Serve() {
 		case mess.Text != nil:
 			text += *mess.Text
 			m := tgBotAPI.NewMessage(chatId, text)
-			m.ParseMode = "Markdown"
+			m.ParseMode = "MarkdownV2"
 			msg = m
 		case mess.Image != nil && len(mess.Image) > 0:
 			m := tgBotAPI.NewPhoto(chatId, tgBotAPI.FileBytes{
 				Name:  "Photo",
 				Bytes: mess.Image,
 			})
-			m.ParseMode = "Markdown"
+			m.ParseMode = "MarkdownV2"
 			if caption != "" {
 				m.Caption = caption
 			} else {
@@ -164,7 +164,7 @@ func (s *server) Serve() {
 				Name:  "Video",
 				Bytes: mess.Video,
 			})
-			m.ParseMode = "Markdown"
+			m.ParseMode = "MarkdownV2"
 			if caption != "" {
 				m.Caption = caption
 			} else {
@@ -176,7 +176,7 @@ func (s *server) Serve() {
 				Name:  "Audio",
 				Bytes: mess.Audio,
 			})
-			m.ParseMode = "Markdown"
+			m.ParseMode = "MarkdownV2"
 			if caption != "" {
 				m.Caption = caption
 			} else {
@@ -194,7 +194,7 @@ func (s *server) Serve() {
 				Name:  name,
 				Bytes: mess.Document,
 			})
-			m.ParseMode = "Markdown"
+			m.ParseMode = "MarkdownV2"
 			if caption != "" {
 				m.Caption = caption
 			} else {
@@ -208,7 +208,7 @@ func (s *server) Serve() {
 			})
 		case mess.Caption != nil:
 			m := tgBotAPI.NewMessage(chatId, caption)
-			m.ParseMode = "Markdown"
+			m.ParseMode = "MarkdownV2"
 			msg = m
 		default:
 			return
