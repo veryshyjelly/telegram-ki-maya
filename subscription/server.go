@@ -184,6 +184,8 @@ func (s *server) Serve() {
 			m := tgBotAPI.NewMessage(chatId, caption)
 			m.ParseMode = "Markdown"
 			msg = m
+		default:
+			return
 		}
 
 		rsp, err := s.conn.Send(msg)
