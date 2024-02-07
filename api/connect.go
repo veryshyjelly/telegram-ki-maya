@@ -9,7 +9,7 @@ import (
 
 func Connect(service subscription.Service) fiber.Handler {
 	return websocket.New(func(conn *websocket.Conn) {
-		apiKey := conn.Headers("API_KEY")
+		apiKey := conn.Query("API_KEY")
 		log.Println("GOT API KEY:", apiKey)
 		if apiKey != "API_KEY" {
 			conn.WriteMessage(websocket.TextMessage, []byte("invalid api key"))
