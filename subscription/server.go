@@ -133,7 +133,14 @@ func (s *server) Serve() {
 			caption = "[" + mess.Sender + "](tg://user?id=6972063311): " + *mess.Caption
 		}
 
-		text := "[" + mess.Sender + "](tg://user?id=6972063311): "
+		text := ""
+
+		if mess.QuotedText != nil {
+			text += "> " + *mess.QuotedText + "\n"
+		}
+
+		text += "[" + mess.Sender + "](tg://user?id=6972063311): "
+
 		switch {
 		case mess.Text != nil:
 			text += *mess.Text
