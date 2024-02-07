@@ -53,7 +53,7 @@ func (s *server) Listen(service Service) {
 			if err != nil {
 				log.Println("error sending message: ", err)
 			}
-			return
+			continue
 		}
 		if !service.HasSubscribers(fmt.Sprint(update.Message.Chat.ID)) {
 			log.Println("no subscribers")
@@ -108,7 +108,6 @@ func (s *server) Listen(service Service) {
 				}
 			}
 			service.SendToClients() <- message
-
 		}(mess)
 	}
 }
