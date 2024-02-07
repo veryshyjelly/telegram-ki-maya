@@ -53,7 +53,7 @@ func (s *server) Listen(service Service) {
 		}
 		mess := update.Message
 		go func(mess *tgBotAPI.Message) {
-			if mess.Command() == "id" {
+			if mess.Text == "/id" {
 				msg := tgBotAPI.NewMessage(mess.Chat.ID, fmt.Sprint(mess.Chat.ID))
 				_, err := s.conn.Send(msg)
 				if err != nil {
