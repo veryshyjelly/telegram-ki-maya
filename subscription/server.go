@@ -67,6 +67,9 @@ func (s *server) Listen(service Service) {
 			message.Caption = &mess.Caption
 			if mess.ReplyToMessage != nil {
 				quotedText := "*" + mess.ReplyToMessage.From.UserName + "*: " + mess.ReplyToMessage.Text
+				if mess.ReplyToMessage.From.ID == s.conn.Self.ID {
+					quotedText = mess.ReplyToMessage.Text
+				}
 				message.QuotedText = &quotedText
 			}
 			var fileUrl string
