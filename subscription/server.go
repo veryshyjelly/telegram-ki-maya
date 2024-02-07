@@ -54,6 +54,7 @@ func (s *server) Listen(service Service) {
 		mess := update.Message
 		message := models.Message{}
 		message.ChatId = fmt.Sprint(mess.Chat.ID)
+		message.Sender = mess.From.UserName
 		var fileUrl string
 		var err error
 		if len(mess.Photo) != 0 {
