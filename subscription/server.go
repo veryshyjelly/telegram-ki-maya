@@ -65,6 +65,10 @@ func (s *server) Listen(service Service) {
 			message.ChatId = fmt.Sprint(mess.Chat.ID)
 			message.Sender = mess.From.UserName
 			message.Caption = &mess.Caption
+			if mess.ReplyToMessage != nil {
+				quotedText := "*" + mess.ReplyToMessage.From.UserName + "*: " + mess.ReplyToMessage.Text
+				message.QuotedText = &quotedText
+			}
 			var fileUrl string
 			var err error
 			if len(mess.Photo) != 0 {
