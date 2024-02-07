@@ -47,20 +47,20 @@ func (s *server) Listen(service Service) {
 		if update.Message == nil {
 			continue
 		}
+		if update.Message.Text == "/id" {
+			msg := tgBotAPI.NewMessage(update.Message.Chat.ID, fmt.Sprint(update.Message.Chat.ID))
+			_, err := s.conn.Send(msg)
+			if err != nil {
+				log.Println("error sending message: ", err)
+			}
+			return
+		}
 		if !service.HasSubscribers(fmt.Sprint(update.Message.Chat.ID)) {
 			log.Println("no subscribers")
 			continue
 		}
 		mess := update.Message
 		go func(mess *tgBotAPI.Message) {
-			if mess.Text == "/id" {
-				msg := tgBotAPI.NewMessage(mess.Chat.ID, fmt.Sprint(mess.Chat.ID))
-				_, err := s.conn.Send(msg)
-				if err != nil {
-					log.Println("error sending message: ", err)
-				}
-				return
-			}
 			message := models.Message{}
 			message.ChatId = fmt.Sprint(mess.Chat.ID)
 			message.Sender = mess.From.UserName
