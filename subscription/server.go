@@ -52,53 +52,64 @@ func (s *server) Listen(service Service) {
 			continue
 		}
 		mess := update.Message
-		message := models.Message{}
-		message.ChatId = fmt.Sprint(mess.Chat.ID)
-		message.Sender = mess.From.UserName
-		message.Caption = &mess.Caption
-		var fileUrl string
-		var err error
-		if len(mess.Photo) != 0 {
-			fileUrl, err = s.conn.GetFileDirectURL(mess.Photo[len(mess.Photo)-1].FileID)
-		} else if mess.Video != nil {
-			fileUrl, err = s.conn.GetFileDirectURL(mess.Video.FileID)
-		} else if mess.Document != nil {
-			fileUrl, err = s.conn.GetFileDirectURL(mess.Document.FileID)
-		} else if mess.Audio != nil {
-			fileUrl, err = s.conn.GetFileDirectURL(mess.Audio.FileID)
-		} else if mess.Sticker != nil {
-			fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
-		} else if mess.Text != "" {
-			message.Text = &mess.Text
-		}
-		if err != nil {
-			log.Println("Error getting direct url.")
-			continue
-		}
-		if fileUrl != "" {
-			httpClient := &http.Client{Timeout: time.Minute * 60}
-			resp, err := httpClient.Get(fileUrl)
-			if err != nil {
-				log.Println("Error getting file.")
-				continue
+		go func(mess *tgBotAPI.Message) {
+			if mess.Text == "/id" {
+				msg := tgBotAPI.NewMessage(mess.Chat.ID, fmt.Sprint(mess.Chat.ID))
+				_, err := s.conn.Send(msg)
+				if err != nil {
+					log.Println("error sending message: ", err)
+				}
+				return
 			}
+			message := models.Message{}
+			message.ChatId = fmt.Sprint(mess.Chat.ID)
+			message.Sender = mess.From.UserName
+			message.Caption = &mess.Caption
+			var fileUrl string
+			var err error
 			if len(mess.Photo) != 0 {
-				message.Image, err = io.ReadAll(resp.Body)
+				fileUrl, err = s.conn.GetFileDirectURL(mess.Photo[len(mess.Photo)-1].FileID)
 			} else if mess.Video != nil {
-				message.Video, err = io.ReadAll(resp.Body)
+				fileUrl, err = s.conn.GetFileDirectURL(mess.Video.FileID)
 			} else if mess.Document != nil {
-				message.Document, err = io.ReadAll(resp.Body)
+				fileUrl, err = s.conn.GetFileDirectURL(mess.Document.FileID)
 			} else if mess.Audio != nil {
-				message.Audio, err = io.ReadAll(resp.Body)
+				fileUrl, err = s.conn.GetFileDirectURL(mess.Audio.FileID)
 			} else if mess.Sticker != nil {
-				message.Sticker, err = io.ReadAll(resp.Body)
+				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
+			} else if mess.Text != "" {
+				message.Text = &mess.Text
 			}
 			if err != nil {
-				fmt.Println("Error while downloading data")
-				continue
+				log.Println("Error getting direct url.")
+				return
 			}
-		}
-		service.SendToClients() <- message
+			if fileUrl != "" {
+				httpClient := &http.Client{Timeout: time.Minute * 60}
+				resp, err := httpClient.Get(fileUrl)
+				if err != nil {
+					log.Println("Error getting file.")
+					return
+				}
+				if len(mess.Photo) != 0 {
+					message.Image, err = io.ReadAll(resp.Body)
+				} else if mess.Video != nil {
+					message.Video, err = io.ReadAll(resp.Body)
+				} else if mess.Document != nil {
+					message.Document, err = io.ReadAll(resp.Body)
+				} else if mess.Audio != nil {
+					message.Audio, err = io.ReadAll(resp.Body)
+				} else if mess.Sticker != nil {
+					message.Sticker, err = io.ReadAll(resp.Body)
+				}
+				if err != nil {
+					fmt.Println("Error while downloading data")
+					return
+				}
+			}
+			service.SendToClients() <- message
+
+		}(mess)
 	}
 }
 
