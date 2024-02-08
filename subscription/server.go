@@ -87,14 +87,8 @@ func (s *server) Listen(service Service) {
 			} else if mess.Sticker != nil {
 				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
 			} else if mess.Text != "" {
-				m := strings.Split(mess.Text, "\n")
-				var x []string
-				for _, v := range m {
-					if v[0] != '>' {
-						x = append(x, v)
-					}
-				}
-				text := strings.Join(x, "\n")
+				m := strings.Split(mess.Text, "``")
+				text := strings.Join(m[1:], "\n")
 				message.Text = &text
 			}
 			if err != nil {
@@ -147,7 +141,7 @@ func (s *server) Serve() {
 
 		if mess.QuotedText != nil {
 			for _, v := range strings.Split(*mess.QuotedText, "\n") {
-				text += "> " + v + "\n"
+				text += "> " + v + "``\n"
 			}
 		}
 
@@ -214,16 +208,24 @@ func (s *server) Serve() {
 			}
 			msg = m
 		case mess.Sticker != nil && len(mess.Sticker) > 0:
-			msg = tgBotAPI.NewSticker(chatId, tgBotAPI.FileBytes{
+			m := tgBotAPI.NewMessage(chatId, text)
+			m.ParseMode = "MarkdownV2"
+			rsp, err := s.conn.Send(m)
+			ms := tgBotAPI.NewSticker(chatId, tgBotAPI.FileBytes{
 				Name:  "Sticker",
 				Bytes: mess.Sticker,
 			})
+			if err != nil {
+				log.Println("error sending message: ", err)
+			}
+			ms.ReplyToMessageID = rsp.MessageID
+			msg = ms
 		case mess.Caption != nil:
 			m := tgBotAPI.NewMessage(chatId, caption)
 			m.ParseMode = "MarkdownV2"
 			msg = m
 		default:
-			return
+			break
 		}
 
 		rsp, err := s.conn.Send(msg)
