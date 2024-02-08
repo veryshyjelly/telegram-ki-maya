@@ -87,10 +87,10 @@ func (s *server) Listen(service Service) {
 			} else if mess.Sticker != nil {
 				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
 			} else if mess.Text != "" {
-				if strings.Contains(mess.Text, "--") {
+				if strings.Contains(mess.Text, "\\-\\-") {
 					m := strings.Split(mess.Text, "\n")
 					for i, v := range m {
-						if strings.Contains(v, "--") {
+						if strings.Contains(v, "\\-\\-") {
 							m = m[i+1:]
 							break
 						}
