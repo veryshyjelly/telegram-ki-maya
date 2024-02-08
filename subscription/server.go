@@ -151,7 +151,7 @@ func (s *server) Serve() {
 
 		if mess.QuotedText != nil {
 			for _, v := range strings.Split(*mess.QuotedText, "\n") {
-				text += "> " + v + "--\n"
+				text += "> " + v + "\\-\\-\n"
 			}
 		}
 
