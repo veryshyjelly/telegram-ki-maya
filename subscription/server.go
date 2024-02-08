@@ -89,7 +89,7 @@ func (s *server) Listen(service Service) {
 			} else if mess.Text != "" {
 				if strings.Contains(mess.Text, "''") {
 					m := strings.Split(mess.Text, "''")
-					text := strings.Join(m[1:], "''")
+					text := strings.Join(m[1:], "\n")
 					message.Text = &text
 				} else {
 					message.Text = &mess.Text
@@ -147,7 +147,7 @@ func (s *server) Serve() {
 			for _, v := range strings.Split(*mess.QuotedText, "\n") {
 				text += "> " + v + "\n"
 			}
-			text += "''"
+			text += "> ''"
 		}
 
 		text += "[" + mess.Sender + "](tg://user?id=6972063311): "
