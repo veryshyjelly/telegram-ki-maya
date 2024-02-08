@@ -87,9 +87,13 @@ func (s *server) Listen(service Service) {
 			} else if mess.Sticker != nil {
 				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
 			} else if mess.Text != "" {
-				m := strings.Split(mess.Text, "``")
-				text := strings.Join(m[1:], "\n")
-				message.Text = &text
+				if strings.Contains(mess.Text, "``") {
+					m := strings.Split(mess.Text, "``")
+					text := strings.Join(m[1:], "``")
+					message.Text = &text
+				} else {
+					message.Text = &mess.Text
+				}
 			}
 			if err != nil {
 				log.Println("Error getting direct url.")
