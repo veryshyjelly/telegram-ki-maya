@@ -87,9 +87,15 @@ func (s *server) Listen(service Service) {
 			} else if mess.Sticker != nil {
 				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
 			} else if mess.Text != "" {
-				if strings.Contains(mess.Text, "''") {
-					m := strings.Split(mess.Text, "''")
-					text := strings.Join(m[1:], "\n")
+				if strings.Contains(mess.Text, "--") {
+					m := strings.Split(mess.Text, "\n")
+					for i, v := range m {
+						if strings.Contains(v, "--") {
+							m = m[i+1:]
+							break
+						}
+					}
+					text := strings.Join(m, "\n")
 					message.Text = &text
 				} else {
 					message.Text = &mess.Text
@@ -145,9 +151,8 @@ func (s *server) Serve() {
 
 		if mess.QuotedText != nil {
 			for _, v := range strings.Split(*mess.QuotedText, "\n") {
-				text += "> " + v + "\n"
+				text += "> " + v + "--\n"
 			}
-			text += "> ''"
 		}
 
 		text += "[" + mess.Sender + "](tg://user?id=6972063311): "
