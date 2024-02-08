@@ -3,6 +3,7 @@ package subscription
 import (
 	"fmt"
 	tgBotAPI "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"html"
 	"io"
 	"log"
 	"net/http"
@@ -40,7 +41,7 @@ func (s *server) Update() chan models.Message {
 
 func (s *server) Listen(service Service) {
 	updatesConfig := tgBotAPI.NewUpdate(0)
-	updatesConfig.Timeout = 30
+	updatesConfig.Timeout = 60
 	updatesChan := s.conn.GetUpdatesChan(updatesConfig)
 	for update := range updatesChan {
 		fmt.Println(pkg.PrintUpdate(&update))
@@ -154,7 +155,7 @@ func (s *server) Serve() {
 
 		switch {
 		case mess.Text != nil:
-			text += *mess.Text
+			text += html.EscapeString(*mess.Text)
 			m := tgBotAPI.NewMessage(chatId, text)
 			m.ParseMode = "MarkdownV2"
 			msg = m
@@ -167,7 +168,7 @@ func (s *server) Serve() {
 			if caption != "" {
 				m.Caption = caption
 			} else {
-				m.Caption = text + "Send a photo."
+				m.Caption = text + "Send a photo"
 			}
 			msg = m
 		case mess.Video != nil && len(mess.Video) > 0:
@@ -179,7 +180,7 @@ func (s *server) Serve() {
 			if caption != "" {
 				m.Caption = caption
 			} else {
-				m.Caption = text + "Send a video."
+				m.Caption = text + "Send a video"
 			}
 			msg = m
 		case mess.Audio != nil && len(mess.Audio) > 0:
@@ -191,7 +192,7 @@ func (s *server) Serve() {
 			if caption != "" {
 				m.Caption = caption
 			} else {
-				m.Caption = text + "Send a audio."
+				m.Caption = text + "Send a audio"
 			}
 			msg = m
 		case mess.Document != nil && len(mess.Document) > 0:
@@ -209,7 +210,7 @@ func (s *server) Serve() {
 			if caption != "" {
 				m.Caption = caption
 			} else {
-				m.Caption = text + "Send a document."
+				m.Caption = text + "Send a document"
 			}
 			msg = m
 		case mess.Sticker != nil && len(mess.Sticker) > 0:
