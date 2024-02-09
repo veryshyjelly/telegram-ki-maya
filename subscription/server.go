@@ -68,15 +68,14 @@ func (s *server) Listen(service Service) {
 			message.Sender = mess.From.UserName
 			message.Caption = &mess.Caption
 			if mess.ReplyToMessage != nil {
-				if strings.Contains(mess.ReplyToMessage.Text, "\\-\\-") {
-					m := strings.Split(mess.ReplyToMessage.Text, "\n")
-					for i, v := range m {
-						if strings.Contains(v, "\\-\\-") {
-							m = m[i+1:]
-							break
+				if strings.Contains(mess.ReplyToMessage.Text, "--") {
+					var res = make([]string, 0)
+					for _, v := range strings.Split(mess.ReplyToMessage.Text, "\n") {
+						if !strings.Contains(v, "--") {
+							res = append(res, v)
 						}
 					}
-					text := strings.Join(m, "\n")
+					text := strings.Join(res, "\n")
 					mess.ReplyToMessage.Text = text
 				}
 				quotedText := "*" + mess.ReplyToMessage.From.UserName + "*: " + mess.ReplyToMessage.Text
