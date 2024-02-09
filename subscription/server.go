@@ -68,9 +68,22 @@ func (s *server) Listen(service Service) {
 			message.Sender = mess.From.UserName
 			message.Caption = &mess.Caption
 			if mess.ReplyToMessage != nil {
+				if strings.Contains(mess.ReplyToMessage.Text, "\\-\\-") {
+					m := strings.Split(mess.ReplyToMessage.Text, "\n")
+					for i, v := range m {
+						if strings.Contains(v, "\\-\\-") {
+							m = m[i+1:]
+							break
+						}
+					}
+					text := strings.Join(m, "\n")
+					mess.ReplyToMessage.Text = text
+				}
 				quotedText := "*" + mess.ReplyToMessage.From.UserName + "*: " + mess.ReplyToMessage.Text
 				if mess.ReplyToMessage.From.ID == s.conn.Self.ID {
 					quotedText = mess.ReplyToMessage.Text
+				} else {
+					message.Text = &mess.Text
 				}
 				message.QuotedText = &quotedText
 			}
@@ -87,19 +100,7 @@ func (s *server) Listen(service Service) {
 			} else if mess.Sticker != nil {
 				fileUrl, err = s.conn.GetFileDirectURL(mess.Sticker.FileID)
 			} else if mess.Text != "" {
-				if strings.Contains(mess.Text, "\\-\\-") {
-					m := strings.Split(mess.Text, "\n")
-					for i, v := range m {
-						if strings.Contains(v, "\\-\\-") {
-							m = m[i+1:]
-							break
-						}
-					}
-					text := strings.Join(m, "\n")
-					message.Text = &text
-				} else {
-					message.Text = &mess.Text
-				}
+				message.Text = &mess.Text
 			}
 			if err != nil {
 				log.Println("Error getting direct url.")
