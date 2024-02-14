@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"fmt"
+	"github.com/Benau/tgsconverter/libtgsconverter"
 	tgBotAPI "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"html"
 	"io"
@@ -122,6 +123,17 @@ func (s *server) Listen(service Service) {
 					message.Audio, err = io.ReadAll(resp.Body)
 				} else if mess.Sticker != nil {
 					message.Sticker, err = io.ReadAll(resp.Body)
+					if mess.Sticker.IsAnimated {
+						opt := libtgsconverter.NewConverterOptions()
+						opt.SetExtension("webp")
+						rsp, err := libtgsconverter.ImportFromData(message.Sticker, opt)
+						if err != nil {
+							log.Println("Error converting sticker")
+							//return
+						} else {
+							message.Sticker = rsp
+						}
+					}
 				}
 				if err != nil {
 					fmt.Println("Error while downloading data")
